@@ -8,6 +8,12 @@ app.get('/user',(req,res)=>{
     res.send({message: "User route accessed successfully"});
 })
 
+//Dynamic route to handle userId parameter
+app.get('/user/:userId',(req,res)=>{
+    console.log(req.params);
+    res.send({message: "User route accessed successfully"});
+})
+
 app.post('/user',(req,res)=>{
     res.send({message: "User created successfully"});
 })
