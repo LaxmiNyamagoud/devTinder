@@ -1,0 +1,15 @@
+const userAuth = (req, res,next) => {
+  const token = "abc";
+  const isUserAuthorized = token === "abc";
+
+  if(isUserAuthorized) {
+    console.log("User is authorized");
+    next();
+  }else{
+    res.status(401).send("Unauthorized access" );
+  }
+}
+
+module.exports={
+    userAuth
+}
