@@ -1,19 +1,80 @@
 const express = require("express");
-
-const {userAuth}=require("./middlewares/userAuth");
+const connectDB = require("./config/database");
+const User = require("./model/user");
 
 const app = express(); //Create an Express application
 
-app.use("/", userAuth);
+app.use(express.json()); //Middleware to parse JSON request bodies
 
-app.get("/user", (req,res)=>{
-    res.send("User endpoint accessed");
+app.post("/signup", async (req, res) => {
+  const newUser = req.body;
+  const user = new User(newUser); //Create a instance of user model
+
+  try {
+    await user.save();
+    res.send("User signed up successfully");
+  } catch (err) {
+    res.status(500).send("Error signing up user: " + err.message);
+  }
+});
+
+// API endpoint to get all users
+app.get("/feed", async (req, res) => {
+  try {
+    const users = await User.find();
+    res.send(users);
+  } catch (err) {
+    res.send("Something went wrong");
+  }
+});
+
+// API endpoint to get a user by email
+app.get("/user", async (req, res) => {
+  const userEmail = req.body.emailId;
+
+  try {
+    const user = await User.find({ emailId: userEmail },{firstName:1,lastName:1},{limit:1,skip:1});
+    if(user.length === 0){
+      return res.send("User not found");
+    }
+    
+    res.send(user);
+  } catch (err) {
+    res.send("Something went wrong");
+  }
+});
+
+app.delete("/user/:userId",async(req,res)=>{
+    const userId = req.params.userId;
+
+    try{
+        await User.findByIdAndDelete(userId);
+        res.send("User deleted successfully");
+    }catch(err){
+        res.send("Something went wrong");
+    }
 })
 
-app.post("/user", (req,res)=>{
-    res.send("User account is created");
+// API endpoint to update a user by ID
+app.patch("/user", async(req,res)=>{
+    const userId = req.query.userId;
+    const updateData = req.body;
+
+    try{
+        await User.findByIdAndUpdate(userId,updateData);
+        res.send("User updated successfully");
+    }catch(err){
+        res.send("Something went wrong");
+    }
 })
 
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
-}); //Start the server on port 3000
+connectDB()
+  .then(() => {
+    console.log("Database connected successfully");
+    app.listen(7777, () => {
+      console.log("Server is running on port 7777");
+    }); //Start the server on port 3000
+  })
+  .catch((error) => {
+    console.error("Database connection failed:", error);
+  });
