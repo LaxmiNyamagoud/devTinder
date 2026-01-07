@@ -1,16 +1,23 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const User = require("./model/user");
+const { validateSignUpData } = require("./utils/validation");
 
 const app = express(); //Create an Express application
 
 app.use(express.json()); //Middleware to parse JSON request bodies
 
 app.post("/signup", async (req, res) => {
-  const newUser = req.body;
-  const user = new User(newUser); //Create a instance of user model
-
   try {
+    //Validation of data
+    validateSignUpData(req);
+    
+    //Encrypt the password
+    const newUser = req.body;
+
+    //Create a instance of user model
+    const user = new User(newUser);
+
     await user.save();
     res.send("User signed up successfully");
   } catch (err) {
@@ -61,7 +68,7 @@ app.patch("/user", async (req, res) => {
   const updateData = req.body;
 
   try {
-    const allowedUpdates = ["photoUrl", "gender","about", "skills"];
+    const allowedUpdates = ["photoUrl", "gender", "about", "skills"];
     const isUpdateAllowed = Object.keys(updateData).every((key) => {
       return allowedUpdates.includes(key);
     });
@@ -70,7 +77,7 @@ app.patch("/user", async (req, res) => {
       throw new Error("Invalid updates!");
     }
 
-    if(updateData?.skills.length > 10){
+    if (updateData?.skills.length > 10) {
       throw new Error("Skills cannot be more than 10");
     }
 
