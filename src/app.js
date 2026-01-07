@@ -33,40 +33,57 @@ app.get("/user", async (req, res) => {
   const userEmail = req.body.emailId;
 
   try {
-    const user = await User.find({ emailId: userEmail },{firstName:1,lastName:1},{limit:1,skip:1});
-    if(user.length === 0){
+    const user = await User.find({ emailId: userEmail });
+    if (user.length === 0) {
       return res.send("User not found");
     }
-    
+
     res.send(user);
   } catch (err) {
     res.send("Something went wrong");
   }
 });
 
-app.delete("/user/:userId",async(req,res)=>{
-    const userId = req.params.userId;
+app.delete("/user/:userId", async (req, res) => {
+  const userId = req.params.userId;
 
-    try{
-        await User.findByIdAndDelete(userId);
-        res.send("User deleted successfully");
-    }catch(err){
-        res.send("Something went wrong");
-    }
-})
+  try {
+    await User.findByIdAndDelete(userId);
+    res.send("User deleted successfully");
+  } catch (err) {
+    res.send("Something went wrong");
+  }
+});
 
 // API endpoint to update a user by ID
-app.patch("/user", async(req,res)=>{
-    const userId = req.query.userId;
-    const updateData = req.body;
+app.patch("/user", async (req, res) => {
+  const userId = req.query.userId;
+  const updateData = req.body;
 
-    try{
-        await User.findByIdAndUpdate(userId,updateData);
-        res.send("User updated successfully");
-    }catch(err){
-        res.send("Something went wrong");
+  try {
+    const allowedUpdates = ["photoUrl", "gender","about", "skills"];
+    const isUpdateAllowed = Object.keys(updateData).every((key) => {
+      return allowedUpdates.includes(key);
+    });
+
+    if (!isUpdateAllowed) {
+      throw new Error("Invalid updates!");
     }
-})
+
+    if(updateData?.skills.length > 10){
+      throw new Error("Skills cannot be more than 10");
+    }
+
+    const newUpdate = await User.findByIdAndUpdate(userId, updateData, {
+      returnDocument: "after",
+      runValidators: true,
+    });
+
+    res.send("User updated successfully");
+  } catch (err) {
+    res.send("Update Failed: " + err.message);
+  }
+});
 
 connectDB()
   .then(() => {
