@@ -44,9 +44,31 @@ app.post("/signup", async (req, res) => {
     await user.save();
     res.send("User signed up successfully");
   } catch (err) {
-    res.status(500).send("Error signing up user: " + err.message);
+    res.status(500).send("ERROR: " + err.message);
   }
 });
+
+app.post("/login", async (req, res) => {
+  const { emailId, password } = req.body;
+
+  try {
+    const user = await User.findOne({ emailId: emailId });
+
+    if (!user) {
+      throw new Error("Invalid credentials");
+    } else {
+      const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+      if (isPasswordMatch) {
+        res.send("Login successful!!");
+      } else {
+        throw new Error("Invalid credentials");
+      }
+    }
+  } catch (err) {
+    res.status(400).send("ERROR: " + err.message);
+  }
+})
 
 // API endpoint to get all users
 app.get("/feed", async (req, res) => {
