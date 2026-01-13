@@ -1,15 +1,33 @@
-const userAuth = (req, res,next) => {
-  const token = "abc";
-  const isUserAuthorized = token === "abc";
+const jwt = require("jsonwebtoken");
+const User = require("../model/user");
 
-  if(isUserAuthorized) {
-    console.log("User is authorized");
-    next();
-  }else{
-    res.status(401).send("Unauthorized access" );
+const userAuth = async(req, res, next) => {
+  try {
+    //Read the token from the cookie
+    const token = req.cookies.token;
+
+    if (!token) {
+      throw new Error("Token is not Valid");
+    }
+
+    //validate the token
+    const decodeObj = await jwt.verify(token, "Node@12345");
+
+    //Find the user
+    const loggedInUser = await User.findById(decodeObj._id);
+
+    if (!loggedInUser) {
+      throw new Error("Unauthorized User");
+    }
+
+    req.User = loggedInUser;
+
+    next(); //Call the next route handler
+  } catch (err) {
+    res.status(400).send("ERROR: " + err.message);
   }
 }
 
-module.exports={
-    userAuth
+module.exports = {
+  userAuth
 }
