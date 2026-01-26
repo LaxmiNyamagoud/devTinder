@@ -14,8 +14,18 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
 
 profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
   try {
-    
+    const allowedEditFields = ["firstName","lastName","age","photoUrl","gender","about","skills"];
+    const isEditAllowed = Object.keys(req.body).every((field)=> allowedEditFields.includes(field));
 
+    if(!isEditAllowed){
+      throw new Error("Invalid Edit Fields!");
+    }
+
+    const loggedInUser = req.User;
+
+    Object.keys(req.body).forEach((field)=>loggedInUser[field]= req.body[field]);
+    await loggedInUser.save();
+    res.send("Profile Updated Successfully!");
   } catch (err) {
     res.send("ERROR:" + err.message)
   }
