@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema(
     },
     photoUrl: {
       type: String,
-      default: "https://example.com/default-photo.jpg",
+      default: "https://www.shutterstock.com/image-vector/custom-default-profile-picture-icon-260nw-2359133587.jpg",
     },
     gender: {
       type: String,
