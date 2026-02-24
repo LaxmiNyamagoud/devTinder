@@ -61,8 +61,18 @@ Server & Deployment: AWS EC2, Nginx, PM2
         proxy_cache_bypass $http_upgrade;
     }
 
-# Frontend Change
+# Frontend Change (https://github.com/LaxmiNyamagoud/devTinder-web)
 const BASE_URL = "/api";
 
 # Request Flow
-![alt text](image.png)
+User → devtinder.com/api/login 
+↓ 
+Nginx receives request 
+↓ 
+Forwards to http://localhost:7777/login
+↓ 
+Backend processes it 
+↓ 
+Response goes back through Nginx
+↓
+User receives response
