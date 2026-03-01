@@ -11,7 +11,7 @@ const userAuth = async(req, res, next) => {
     }
 
     //validate the token
-    const decodeObj = await jwt.verify(token, "Node@12345");
+    const decodeObj = await jwt.verify(token, process.env.JWT_SECRET_KEY);
 
     //Find the user
     const loggedInUser = await User.findById(decodeObj._id);
